@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 @Entity({ name: 'enterprises' })
 export class EnterpriseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -21,4 +27,10 @@ export class EnterpriseEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   contactMail: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updateAt: Date;
 }
