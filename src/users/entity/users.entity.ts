@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { UsersRoles } from './users.roles';
 
 @Entity({ name: 'users' })
@@ -20,4 +26,10 @@ export class UsersEntity {
 
   @Column({ type: 'enum', enum: UsersRoles })
   role: UsersRoles;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updateAt: Date;
 }
