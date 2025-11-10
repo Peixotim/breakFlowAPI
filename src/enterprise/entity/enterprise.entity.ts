@@ -1,3 +1,24 @@
-import { Entity } from 'typeorm';
-@Entity()
-export class EnterpriseEntity {}
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+@Entity({ name: 'enterprises' })
+export class EnterpriseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  uuid: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  companyName: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  fantasyName: string;
+
+  @Column({ type: 'varchar', length: 14, unique: true })
+  cnpj: string;
+
+  @Column({ type: 'int' })
+  numberOfEmployees: number;
+
+  @Column({ type: 'int' })
+  numberOfSectors: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  contactMail: string;
+}
