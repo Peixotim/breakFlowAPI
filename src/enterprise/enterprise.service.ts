@@ -9,4 +9,6 @@ export class EnterpriseService {
     @InjectRepository(EnterpriseEntity)
     private readonly enterpriseRepository: Repository<EnterpriseEntity>,
   ) {}
+
+  public async createEnterprise(): Promise<EnterpriseEntity> {}
 }
