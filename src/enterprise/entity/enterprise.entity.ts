@@ -15,7 +15,7 @@ export class EnterpriseEntity {
   @Column({ type: 'varchar', length: 255 })
   companyName: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   fantasyName: string;
 
   @Column({ type: 'varchar', length: 14, unique: true })
