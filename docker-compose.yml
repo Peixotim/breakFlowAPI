@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     
     environment:
-      POSTGRES_USER: postgres_user
-      POSTGRES_PASSWORD: StrongPassword123
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
       POSTGRES_DB: breakflow_db
       
     ports:
