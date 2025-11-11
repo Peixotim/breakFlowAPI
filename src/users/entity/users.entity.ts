@@ -17,6 +17,9 @@ export class UsersEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   mail: string;
 
+  @Column({ type: 'varchar', length: 11, unique: true })
+  cpf: string;
+
   @Column({ type: 'varchar', length: 100 })
   password: string;
 
