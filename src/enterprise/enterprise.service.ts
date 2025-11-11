@@ -1,13 +1,12 @@
 import {
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EnterpriseEntity } from './entity/enterprise.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { EnterpriseCreate } from './DTOs/enterprise-create.dto';
 
 @Injectable()
@@ -27,62 +26,61 @@ export class EnterpriseService {
     await queryRunner.startTransaction();
 
     try {
-      const cnpjExists = await queryRunner.manager.existsBy(EnterpriseEntity, {
-        cnpj: request.cnpj,
-      });
-
-      if (cnpjExists) {
-        throw new HttpException(
-          `Error: A company with this CNPJ already exists !`,
-          HttpStatus.CONFLICT,
-        );
-      }
-
-      //Se possuir o campo contactMail preenchido entra no if
-      if (request.contactMail) {
-        const contactMailExists = await queryRunner.manager.existsBy(
-          EnterpriseEntity,
-          {
-            contactMail: request.contactMail,
-          },
-        );
-
-        if (contactMailExists) {
-          throw new HttpException(
-            `Error: A company with this email address already exists!`,
-            HttpStatus.CONFLICT,
-          );
-        }
-      }
-      const newEnterprise: EnterpriseEntity = queryRunner.manager.create(
-        EnterpriseEntity,
+      const enterprise = await this._createWithManager(
         request,
+        queryRunner.manager,
       );
 
-      const saved: EnterpriseEntity =
-        await queryRunner.manager.save(newEnterprise);
       await queryRunner.commitTransaction();
-      return saved;
+      return enterprise;
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+
       this.logger.error(
-        `Falha ao criar nova empresa. Erro: ${error}`,
+        `Failed to create new company. Error: ${error}`,
         (error as Error).stack,
       );
 
-      if (error instanceof ConflictException) {
-        throw new HttpException(
-          `Error, there was a conflict while registering , verify logs`,
-          HttpStatus.CONFLICT,
-        );
-      }
-      throw new HttpException(
-        `Error, unexpected`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      throw new InternalServerErrorException(
+        'Unexpected error when creating company.',
       );
     } finally {
       await queryRunner.release();
     }
+  }
+
+  public async _createWithManager(
+    request: EnterpriseCreate,
+    manager: EntityManager,
+  ): Promise<EnterpriseEntity> {
+    const cnpjExists = await manager.existsBy(EnterpriseEntity, {
+      cnpj: request.cnpj,
+    });
+    if (cnpjExists) {
+      throw new ConflictException(
+        `Error: A company with this CNPJ already exists !`,
+      );
+    }
+    if (request.contactMail) {
+      const contactMailExists = await manager.existsBy(EnterpriseEntity, {
+        contactMail: request.contactMail,
+      });
+      if (contactMailExists) {
+        throw new ConflictException(
+          `Error: A company with this email address already exists!`,
+        );
+      }
+    }
+
+    const newEnterprise: EnterpriseEntity = manager.create(
+      EnterpriseEntity,
+      request,
+    );
+    const saved: EnterpriseEntity = await manager.save(newEnterprise);
+    return saved;
   }
 }
