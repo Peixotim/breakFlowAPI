@@ -7,6 +7,7 @@ import {
   IsEmail,
   Length,
 } from 'class-validator';
+import { IsCnpj } from 'src/core/validators/is-cnpj.validator';
 
 export class EnterpriseCreate {
   @IsString({ message: 'Error: The type passed must be string.¬' })
@@ -29,6 +30,7 @@ export class EnterpriseCreate {
   @Length(14, 14, {
     message: 'Error: The CNPJ must contain exactly 14 characters.',
   })
+  @IsCnpj({ message: 'The CNPJ entered is mathematically invalid.' })
   cnpj: string;
 
   @IsInt({ message: 'Error: The number must be of integer type.' })
