@@ -74,6 +74,7 @@ export class UsersService {
     });
 
     const saved: UsersEntity = await manager.save(newUser);
+    //Observação de feature : Remover do retorno a senha do User
     return saved;
   }
 }
