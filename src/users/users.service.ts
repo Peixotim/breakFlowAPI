@@ -1,13 +1,12 @@
 import {
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateUser } from './DTOs/users-create.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -21,62 +20,60 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   public async createUser(request: CreateUser): Promise<UsersEntity> {
-    const saltRounds: number = 12;
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
     try {
-      const mailExists = await queryRunner.manager.existsBy(UsersEntity, {
-        mail: request.mail,
-      });
-      const cpfExists = await queryRunner.manager.existsBy(UsersEntity, {
-        cpf: request.cpf,
-      });
-
-      if (mailExists) {
-        throw new ConflictException(
-          `Error: The email '${request.mail}' is already registered.`,
-        );
-      }
-
-      if (cpfExists) {
-        throw new ConflictException(
-          `Error: The CPF entered is already registered.`,
-        );
-      }
-
-      const salt: string = await bcrypt.genSalt(saltRounds);
-      const hash: string = await bcrypt.hash(request.password, salt);
-
-      const newUser: UsersEntity = queryRunner.manager.create(UsersEntity, {
-        ...request, // spread Operator(Copia os dados do request)
-        password: hash, // E sobrescreve o 'password' com o hash
-      });
-
-      const saved: UsersEntity = await queryRunner.manager.save(newUser);
+      const user = await this._createWithManager(request, queryRunner.manager);
       await queryRunner.commitTransaction();
-
-      return saved;
-    } catch (error: unknown) {
+      return user;
+    } catch (error) {
       await queryRunner.rollbackTransaction();
 
       if (error instanceof ConflictException) {
         throw error;
       }
-
-      const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Failed to create user. DTO:${JSON.stringify(request)}`,
-        stack,
+        `Failed to create user: ${error}`,
+        (error as Error).stack,
       );
-
-      throw new HttpException(
-        'Unexpected error when creating the user.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException('Unexpected error creating user.');
     } finally {
       await queryRunner.release();
     }
+  }
+
+  public async _createWithManager(
+    request: CreateUser,
+    manager: EntityManager,
+  ): Promise<UsersEntity> {
+    const mailExists = await manager.existsBy(UsersEntity, {
+      mail: request.mail,
+    });
+    if (mailExists) {
+      throw new ConflictException(
+        `Error: The email '${request.mail}' is already registered.`,
+      );
+    }
+
+    const cpfExists = await manager.existsBy(UsersEntity, { cpf: request.cpf });
+    if (cpfExists) {
+      throw new ConflictException(
+        `Error: The CPF entered is already registered.`,
+      );
+    }
+
+    const saltRounds: number = 12;
+    const salt: string = await bcrypt.genSalt(saltRounds);
+    const hash: string = await bcrypt.hash(request.password, salt);
+
+    const newUser: UsersEntity = manager.create(UsersEntity, {
+      ...request,
+      password: hash,
+    });
+
+    const saved: UsersEntity = await manager.save(newUser);
+    return saved;
   }
 }
