@@ -27,7 +27,7 @@ export class EnterpriseEntity {
   @Column({ type: 'int' })
   numberOfSectors: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   contactMail: string;
 
   @CreateDateColumn()
