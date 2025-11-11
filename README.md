@@ -42,3 +42,18 @@ Siga os passos abaixo para configurar e executar o projeto em seu ambiente de de
 * [Node.js](https://nodejs.org/en/) (Recomendado: v18 ou superior)
 * [NPM](https://www.npmjs.com/) ou [Yarn](https://yarnpkg.com/)
 * Uma instância do [PostgreSQL](https://www.postgresql.org/download/) rodando (localmente ou via Docker).
+
+### ⚙️ Configuração do Ambiente (.env)
+
+Antes de iniciar o projeto, é necessário criar um arquivo chamado .env na raiz do projeto contendo as variáveis de ambiente utilizadas para conectar ao banco de dados e configurar o servidor.
+
+Exemplo de configuração:
+
+```bash
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
+DB_DATABASE=breakflow_db
+JWT_SECRET=uma_chave_segura_aqui
+```
