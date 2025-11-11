@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { UsersRoles } from './users.roles';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
+import { IsCpf } from 'src/core/validators/is-cpf.validator';
 
 @Entity({ name: 'users' })
 export class UsersEntity {
@@ -18,6 +19,7 @@ export class UsersEntity {
   mail: string;
 
   @Column({ type: 'varchar', length: 11, unique: true })
+  @IsCpf()
   cpf: string;
 
   @Column({ type: 'varchar', length: 100 })
