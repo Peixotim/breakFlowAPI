@@ -3,6 +3,7 @@ import {
   ConflictException,
   Logger,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { EnterpriseService } from 'src/enterprise/enterprise.service';
 import { UsersService } from 'src/users/users.service';
@@ -11,6 +12,9 @@ import { RegisterEnterpriseDto } from './DTOs/register.dto';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import { UsersRoles } from 'src/users/entity/users.roles';
+import { LoginUser } from './DTOs/login.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +23,7 @@ export class AuthService {
     private readonly enterpriseService: EnterpriseService,
     private readonly usersService: UsersService,
     private dataSource: DataSource,
+    private readonly jwtService: JwtService,
   ) {}
 
   public async registerEnterprise(
@@ -68,5 +73,30 @@ export class AuthService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  public async login(request: LoginUser): Promise<{ access_token: string }> {
+    const user = await this.usersService.findByMail(request.mail);
+
+    const isMatch = user
+      ? await bcrypt.compare(request.password, user.password)
+      : false;
+
+    if (!isMatch || !user) {
+      throw new UnauthorizedException(
+        'Error: The data provided is incorrect ! ',
+      );
+    }
+
+    const payload = {
+      sub: user.uuid,
+      email: user.mail,
+      role: user.role,
+      enterpriseId: user.enterprise?.uuid,
+    };
+    const token = await this.jwtService.signAsync(payload);
+    return {
+      access_token: token,
+    };
   }
 }
