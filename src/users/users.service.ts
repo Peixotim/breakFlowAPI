@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -76,5 +77,17 @@ export class UsersService {
     const saved: UsersEntity = await manager.save(newUser);
     //Observação de feature : Remover do retorno a senha do User
     return saved;
+  }
+
+  public async findByMail(mail: string): Promise<UsersEntity | null> {
+    if (!mail?.trim()) {
+      throw new BadRequestException('The email field cannot be empty.');
+    }
+    const email = mail.trim().toLowerCase();
+    const user = await this.userRepository.findOneBy({ mail: email });
+    if (!user) {
+      return null; //Nao posso personalizar o erro por conta de seguranca
+    }
+    return user;
   }
 }
