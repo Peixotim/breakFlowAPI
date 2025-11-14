@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EnterpriseEntity } from './entity/enterprise.entity';
@@ -82,5 +83,17 @@ export class EnterpriseService {
     );
     const saved: EnterpriseEntity = await manager.save(newEnterprise);
     return saved;
+  }
+
+  public async findByCnpj(cnpj: string): Promise<EnterpriseEntity> {
+    const enterprise = await this.enterpriseRepository.findOneBy({
+      cnpj: cnpj,
+    });
+
+    if (!enterprise) {
+      throw new NotFoundException('Error: No company was found with this CNPJ');
+    }
+
+    return enterprise;
   }
 }
