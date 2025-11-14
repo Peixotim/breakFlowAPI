@@ -4,6 +4,7 @@ import {
   Logger,
   InternalServerErrorException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { EnterpriseService } from 'src/enterprise/enterprise.service';
 import { UsersService } from 'src/users/users.service';
@@ -65,7 +66,7 @@ export class AuthService {
       }
 
       this.logger.error(
-        `Falha ao registrar empresa. DTO: ${JSON.stringify(request)}`,
+        `Failed to register company. DTO:${JSON.stringify(request)}`,
         (error as Error).stack,
       );
       throw new InternalServerErrorException(
@@ -101,17 +102,53 @@ export class AuthService {
     };
   }
 
-  public async registerEmployee(request : RegisterEmployee): Promise<UsersEntity>{
+  public async registerEmployee(
+    request: RegisterEmployee,
+  ): Promise<UsersEntity> {
+    const enterprise: EnterpriseEntity =
+      await this.enterpriseService.findByCnpj(request.cnpj);
+    if (!enterprise) {
+      throw new NotFoundException(
+        'Error, the company with this cnpj does not exist!',
+      );
+    }
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    try{
-     const newEmployee : UsersEntity = await this.usersService._createWithManager(
-        request.employee,
-        queryRunner.manager,
-      );
+    try {
+      const employee = {
+        ...request.employee,
+        role: UsersRoles.EMPLOYEE,
+      };
+      const newEmployee: UsersEntity =
+        await this.usersService._createWithManager(
+          employee,
+          queryRunner.manager,
+        );
 
-    }catch(error){}
+      newEmployee.enterprise = enterprise;
+      await queryRunner.manager.save(newEmployee);
+      await queryRunner.commitTransaction();
+
+      newEmployee.password = '';
+      return newEmployee;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Failed to register an employee. DTO: ${JSON.stringify(request)}`,
+        (error as Error).stack,
+      );
+      throw new InternalServerErrorException(
+        'Unexpected error when registering an employee',
+      );
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
