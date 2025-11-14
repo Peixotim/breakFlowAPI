@@ -4,11 +4,12 @@ import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import { RegisterEnterpriseDto } from './DTOs/register-enterprise.dto';
 import { LoginUser } from './DTOs/login.dto';
+import { RegisterEmployee } from './DTOs/register-employee';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
+  @Post('register-enterprise')
   public async registerEnterprise(
     @Body() request: RegisterEnterpriseDto,
   ): Promise<{
@@ -23,5 +24,13 @@ export class AuthController {
     @Body() request: LoginUser,
   ): Promise<{ access_token: string }> {
     return await this.authService.login(request);
+  }
+
+  @Post('register-employee')
+  public async RegisterEmployee(
+    @Body()
+    request: RegisterEmployee,
+  ): Promise<UsersEntity> {
+    return await this.authService.registerEmployee(request);
   }
 }
