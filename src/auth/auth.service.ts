@@ -8,13 +8,14 @@ import {
 import { EnterpriseService } from 'src/enterprise/enterprise.service';
 import { UsersService } from 'src/users/users.service';
 import { DataSource } from 'typeorm';
-import { RegisterEnterpriseDto } from './DTOs/register.dto';
+import { RegisterEnterpriseDto } from './DTOs/register-enterprise.dto';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import { UsersRoles } from 'src/users/entity/users.roles';
 import { LoginUser } from './DTOs/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { RegisterEmployee } from './DTOs/register-employee';
 
 @Injectable()
 export class AuthService {
@@ -98,5 +99,19 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  public async registerEmployee(request : RegisterEmployee): Promise<UsersEntity>{
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try{
+     const newEmployee : UsersEntity = await this.usersService._createWithManager(
+        request.employee,
+        queryRunner.manager,
+      );
+
+    }catch(error){}
   }
 }
