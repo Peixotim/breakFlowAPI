@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UsersRoles } from './users.roles';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { IsCpf } from 'src/core/validators/is-cpf.validator';
+import { PasswordResetEntity } from 'src/password-reset/entity/password-reset.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity {
@@ -42,4 +44,7 @@ export class UsersEntity {
 
   @ManyToOne(() => EnterpriseEntity, (enterprise) => enterprise.users)
   enterprise: EnterpriseEntity;
+
+  @OneToMany(() => PasswordResetEntity, (passwordReset) => passwordReset.user)
+  codesOTP: PasswordResetEntity[];
 }
