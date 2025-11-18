@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { RequestMailForgotPassword } from './DTOs/password-reset.dto';
 import { UsersService } from 'src/users/users.service';
 import { randomInt } from 'crypto';
@@ -6,6 +10,8 @@ import { PasswordResetEntity } from './entity/password-reset.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MailService } from 'src/mail/mail.service';
+import { PasswordVerify } from './DTOs/password-verifyCode';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class PasswordResetService {
   constructor(
@@ -13,36 +19,8 @@ export class PasswordResetService {
     private readonly passwordResetRepository: Repository<PasswordResetEntity>,
     private readonly userService: UsersService,
     private readonly mailService: MailService,
+    private readonly jwtService: JwtService,
   ) {}
-
-  public async forgotPassword(request: RequestMailForgotPassword) {
-    const user = await this.userService.findByMail(request.mail);
-
-    if (!user) {
-      throw new NotFoundException('Error, the email entered is invalid!');
-    }
-
-    const code = randomInt(100000, 999999);
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-    const newPasswordReset = this.passwordResetRepository.create({
-      user: user,
-      used: false,
-      codeGenerator: code,
-      expiresAt: expiresAt,
-    });
-
-    await this.passwordResetRepository.save(newPasswordReset);
-
-    const emailHtml = this.generateEmailTemplate(user.name, code);
-
-    return this.mailService.sendMail(
-      request.mail,
-      'Redefinição de Senha - BreakFlow',
-      `Seu código de recuperação é: ${code}`,
-      emailHtml,
-    );
-  }
 
   private generateEmailTemplate(userName: string, code: number): string {
     const currentYear = new Date().getFullYear();
@@ -59,7 +37,6 @@ export class PasswordResetService {
       <head>
         <meta charset="utf-8">
         <style>
-          /* Reset básico para clientes de e-mail */
           body { margin: 0; padding: 0; background-color: ${bgDark}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
           table { border-spacing: 0; }
           td { padding: 0; }
@@ -138,5 +115,77 @@ export class PasswordResetService {
       </body>
       </html>
     `;
+  }
+
+  public async forgotPassword(request: RequestMailForgotPassword) {
+    const user = await this.userService.findByMail(request.mail);
+
+    if (!user) {
+      throw new NotFoundException('Error, the email entered is invalid!');
+    }
+
+    const code = randomInt(100000, 999999);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    const newPasswordReset = this.passwordResetRepository.create({
+      user: user,
+      used: false,
+      codeGenerator: code,
+      expiresAt: expiresAt,
+    });
+
+    await this.passwordResetRepository.save(newPasswordReset);
+
+    const emailHtml = this.generateEmailTemplate(user.name, code);
+
+    return this.mailService.sendMail(
+      request.mail,
+      'Redefinição de Senha - BreakFlow',
+      `Seu código de recuperação é: ${code}`,
+      emailHtml,
+    );
+  }
+
+  public async verifyCode(
+    request: PasswordVerify,
+  ): Promise<{ token_release: string }> {
+    const user = await this.userService.findByMail(request.mail);
+
+    if (!user) {
+      throw new NotFoundException('Error: The email entered is invalid!');
+    }
+
+    const codeInput = parseInt(request.code);
+
+    const resetRecord = await this.passwordResetRepository.findOne({
+      where: {
+        codeGenerator: codeInput,
+        user: { uuid: user.uuid },
+        used: false,
+      },
+      order: { expiresAt: 'DESC' },
+    });
+
+    if (!resetRecord) {
+      throw new BadRequestException('Error: Invalid or used code!');
+    }
+
+    if (resetRecord.expiresAt < new Date()) {
+      throw new BadRequestException('Error: This code has expired!');
+    }
+
+    const payload = {
+      sub: user.uuid,
+      email: user.mail,
+      purpose: 'password_reset',
+    };
+
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '10m',
+    });
+
+    return {
+      token_release: token,
+    };
   }
 }
