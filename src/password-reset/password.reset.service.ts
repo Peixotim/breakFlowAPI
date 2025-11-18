@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { RequestMailForgotPassword } from './DTOs/password-reset.dto';
+import { RequestMailForgotPassword } from './DTOs/RequestMail-ForgotPassword.dto';
 import { UsersService } from 'src/users/users.service';
 import { randomInt } from 'crypto';
 import { PasswordResetEntity } from './entity/password-reset.entity';
@@ -12,6 +12,8 @@ import { Repository } from 'typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { PasswordVerify } from './DTOs/password-verifyCode';
 import { JwtService } from '@nestjs/jwt';
+import { PasswordResetDTO } from './DTOs/password-reset.dto';
+import { ResetTokenPayload } from './types/payload';
 @Injectable()
 export class PasswordResetService {
   constructor(
@@ -187,5 +189,29 @@ export class PasswordResetService {
     return {
       token_release: token,
     };
+  }
+
+  public async resetPassword(request: PasswordResetDTO) {
+    let payload: ResetTokenPayload;
+    try {
+      payload = await this.jwtService.verifyAsync(request.token);
+    } catch (error) {
+      throw new BadRequestException(
+        'Error: The reset token is invalid or has expired.',
+      );
+      console.error(error);
+    }
+    //Verifica o tipo do payload
+    if (payload.purpose !== 'password_reset') {
+      throw new BadRequestException('Error: Invalid token purpose.');
+    }
+
+    const user = await this.userService.findByUuid(payload.sub);
+
+    if (!user) {
+      throw new NotFoundException('Error,  user not found !');
+    }
+
+    await this.userService.updatePassword(user.uuid, request.password);
   }
 }

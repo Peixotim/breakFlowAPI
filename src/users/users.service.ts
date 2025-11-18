@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
@@ -89,5 +90,31 @@ export class UsersService {
       return null; //Nao posso personalizar o erro por conta de seguranca
     }
     return user;
+  }
+
+  public async findByUuid(uuid: string): Promise<UsersEntity | null> {
+    const user = await this.userRepository.findOneBy({ uuid: uuid });
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+  }
+
+  public async updatePassword(uuid: string, password: string): Promise<void> {
+    const user = await this.userRepository.findOneBy({ uuid: uuid });
+
+    if (!user) {
+      throw new NotFoundException('Error: User not found!');
+    }
+
+    const saltRounds: number = 12;
+    const salt: string = await bcrypt.genSalt(saltRounds);
+    const hash: string = await bcrypt.hash(password, salt);
+
+    user.password = hash;
+
+    await this.userRepository.save(user);
   }
 }
