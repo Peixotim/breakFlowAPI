@@ -21,13 +21,19 @@ export class MailService {
     });
   }
 
-  public async sendMail(to: string, subject: string, content: string) {
+  public async sendMail(
+    to: string,
+    subject: string,
+    content: string,
+    htmlContent?: string,
+  ) {
     try {
       const MailOptions = {
         from: `"No Reply BreakFlow | " <${process.env.EMAIL_FROM}>`, // Enviado por quem
         to, // Para quem
         subject, // Oque é
         text: content, //Conteudo
+        htmlContent: htmlContent,
       };
       await this.transporter.sendMail(MailOptions);
 
