@@ -29,12 +29,13 @@ export class MailService {
   ) {
     try {
       const MailOptions = {
-        from: `"No Reply BreakFlow | " <${process.env.EMAIL_FROM}>`, // Enviado por quem
-        to, // Para quem
-        subject, // Oque é
-        text: content, //Conteudo
-        htmlContent: htmlContent,
+        from: `"BreakFlow" <${process.env.EMAIL_FROM}>`,
+        to,
+        subject,
+        text: content,
+        html: htmlContent || content,
       };
+
       await this.transporter.sendMail(MailOptions);
 
       this.logger.log(`Email sent to ${to}`);
