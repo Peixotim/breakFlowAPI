@@ -128,7 +128,7 @@ export class PasswordResetService {
                 <div style="height: 1px; background-color: rgba(255,255,255,0.05); margin-bottom: 30px;"></div>
                 <p style="margin: 0; font-size: 12px; color: #555;">
                   &copy; ${currentYear} BreakFlow Security System.<br>
-                  São Paulo, Brasil.
+                  Minas Gerais, Brasil.
                 </p>
               </td>
             </tr>
