@@ -196,11 +196,12 @@ export class PasswordResetService {
     try {
       payload = await this.jwtService.verifyAsync(request.token);
     } catch (error) {
+      console.error(error);
       throw new BadRequestException(
         'Error: The reset token is invalid or has expired.',
       );
-      console.error(error);
     }
+
     //Verifica o tipo do payload
     if (payload.purpose !== 'password_reset') {
       throw new BadRequestException('Error: Invalid token purpose.');
