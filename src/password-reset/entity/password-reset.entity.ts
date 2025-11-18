@@ -10,7 +10,8 @@ import {
 @Entity('password-reset')
 export class PasswordResetEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
+
   @Column({ type: 'int' })
   codeGenerator: number;
 
@@ -18,7 +19,7 @@ export class PasswordResetEntity {
   used: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt?: Date;
 
   @Column({ type: 'timestamp' })
   expiresAt: Date;
