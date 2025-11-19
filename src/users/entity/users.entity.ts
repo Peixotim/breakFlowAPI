@@ -30,8 +30,14 @@ export class UsersEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({ type: 'varchar', nullable: false })
+  username: string;
+
   @Column({ type: 'varchar', nullable: true })
   avatarUrl: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  biography: string;
 
   @Column({ type: 'enum', enum: UsersRoles })
   role: UsersRoles;
