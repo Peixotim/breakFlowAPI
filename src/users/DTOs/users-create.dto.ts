@@ -43,4 +43,12 @@ export class CreateUser {
   @IsEnum(UsersRoles, { message: 'Error, the type passed must be an enum!' })
   @IsNotEmpty({ message: 'Error the value passed cannot be empty!' })
   role: UsersRoles;
+
+  @IsString({ message: 'Error, the type passed must be a string' })
+  @IsOptional()
+  username?: string;
+
+  @IsString({ message: 'Error, the type passed must be a string' })
+  @IsOptional()
+  biography?: string;
 }

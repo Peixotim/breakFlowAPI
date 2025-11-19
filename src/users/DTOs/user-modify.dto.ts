@@ -5,17 +5,17 @@ export class ModifyUserDTO {
     message: 'Error: The maximum number of characters is 255.',
   })
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsString({ message: 'Error, the type passed must be a string' })
   @IsOptional()
-  avatarUrl: string;
+  avatarUrl?: string;
 
   @IsString({ message: 'Error, the type passed must be a string' })
   @IsOptional()
-  username: string;
+  username?: string;
 
   @IsString({ message: 'Error, the type passed must be a string' })
   @IsOptional()
-  biography: string;
+  biography?: string;
 }

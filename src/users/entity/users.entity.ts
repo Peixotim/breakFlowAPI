@@ -30,7 +30,7 @@ export class UsersEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   username: string;
 
   @Column({ type: 'varchar', nullable: true })

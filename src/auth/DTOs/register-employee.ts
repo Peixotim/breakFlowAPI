@@ -21,5 +21,5 @@ export class RegisterEmployee {
   @MaxLength(14, {
     message: 'Error: The CNPJ must contain exactly 14 characters.',
   })
-  cnpj : string;
+  cnpj: string;
 }
