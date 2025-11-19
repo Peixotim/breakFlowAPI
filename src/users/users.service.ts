@@ -11,6 +11,9 @@ import { UsersEntity } from './entity/users.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateUser } from './DTOs/users-create.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './types/payload-types';
+import { ModifyUserDTO } from './DTOs/user-modify.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +21,7 @@ export class UsersService {
     @InjectRepository(UsersEntity)
     private readonly userRepository: Repository<UsersEntity>,
     private dataSource: DataSource,
+    private jwtService: JwtService,
   ) {}
   private readonly logger = new Logger(UsersService.name);
 
@@ -116,5 +120,43 @@ export class UsersService {
     user.password = hash;
 
     await this.userRepository.save(user);
+  }
+
+  public async modifyAccount(
+    sessionToken: string,
+    request: ModifyUserDTO,
+  ): Promise<UsersEntity> {
+    if (!sessionToken) {
+      throw new BadRequestException(
+        'Error, you need to be in a session to modify your data.',
+      );
+    }
+
+    if (!request) {
+      throw new BadRequestException('Error: the request was empty');
+    }
+
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(sessionToken);
+      const mailPayload = payload.mail;
+      const user = await this.userRepository.findOneBy({ mail: mailPayload });
+
+      if (user === null || user === undefined) {
+        throw new BadRequestException('Error : User Not Found !');
+      }
+
+      const userModify: UsersEntity = this.userRepository.merge(user, {
+        avatarUrl: request.avatarUrl,
+        name: request.name,
+        username: request.username,
+        biography: request.biography,
+      });
+
+      const savedUser: UsersEntity = await this.userRepository.save(userModify);
+
+      return savedUser;
+    } catch (erro) {
+      throw new BadRequestException(`Invalid or expired token , ${erro} `);
+    }
   }
 }
