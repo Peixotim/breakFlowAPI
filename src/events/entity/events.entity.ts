@@ -1,5 +1,13 @@
+import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class EventsEntity {
@@ -19,5 +27,9 @@ export class EventsEntity {
   colorTheme: string;
 
   @ManyToMany(() => UsersEntity, (users) => users.events)
+  @JoinTable()
   users: UsersEntity[];
+
+  @ManyToOne(() => EnterpriseEntity, (enterprise) => enterprise.events)
+  enterprise: EnterpriseEntity;
 }
