@@ -10,5 +10,8 @@ export class EventsService {
     private readonly userRepository: Repository<EventsEntity>,
   ) {}
 
-  public async eventsRegister() {}
+  public async eventsRegister() {
+    //Observação quando for criar o metodo de create , devo pegar
+    //O access_token da pessoa para identificar a empresa que vai ser vinculada o evento
+  }
 }
