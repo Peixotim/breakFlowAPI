@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { UsersRoles } from './users.roles';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { IsCpf } from 'src/core/validators/is-cpf.validator';
 import { PasswordResetEntity } from 'src/password-reset/entity/password-reset.entity';
+import { EventsEntity } from 'src/events/entity/events.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity {
@@ -53,4 +55,7 @@ export class UsersEntity {
 
   @OneToMany(() => PasswordResetEntity, (passwordReset) => passwordReset.user)
   codesOTP: PasswordResetEntity[];
+
+  @ManyToMany(() => EventsEntity, (events) => events.users)
+  events: EventsEntity[];
 }
