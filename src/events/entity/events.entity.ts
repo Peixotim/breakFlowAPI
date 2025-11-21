@@ -2,11 +2,13 @@ import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -23,8 +25,14 @@ export class EventsEntity {
   @Column({ type: 'int', nullable: false })
   durationLimit: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   colorTheme: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToMany(() => UsersEntity, (users) => users.events)
   @JoinTable()
