@@ -1,8 +1,9 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -19,7 +20,7 @@ export class RolesGuard implements CanActivate {
     const authHeader = request.headers['authorization']; //Pega do header, a parte do authorization
 
     if (!authHeader) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         'Error, no token was sent/received in the request header',
       );
     }
@@ -30,19 +31,24 @@ export class RolesGuard implements CanActivate {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
       const allowedRoles = ['OWNER', 'MANAGER'];
       if (!allowedRoles.includes(payload.role)) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'Error, you do not have permission (Manager/Owner only) to create an event!',
         );
       }
       return true;
     } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+
       if (
         error instanceof JsonWebTokenError ||
         error instanceof TokenExpiredError
       ) {
-        throw new BadRequestException('Invalid or expired token');
+        throw new UnauthorizedException('Invalid or expired token');
       }
-      throw error;
+
+      throw new UnauthorizedException();
     }
   }
 }
