@@ -41,5 +41,5 @@ export class EnterpriseEntity {
   users: UsersEntity[];
 
   @OneToMany(() => EventsEntity, (events) => events.enterprise)
-  events: EnterpriseEntity[];
+  events: EventsEntity[];
 }
