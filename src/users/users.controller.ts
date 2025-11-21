@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
+
   @Patch('modifyUser')
   public async modifyUser(
     @Headers('authorization') authHeader: string, //Recebe a sessionToken
