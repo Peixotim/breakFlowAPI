@@ -89,7 +89,11 @@ export class UsersService {
       throw new BadRequestException('The email field cannot be empty.');
     }
     const email = mail.trim().toLowerCase();
-    const user = await this.userRepository.findOneBy({ mail: email });
+
+    const user = await this.userRepository.findOne({
+      where: { mail: email },
+      relations: ['enterprise'],
+    });
     if (!user) {
       return null; //Nao posso personalizar o erro por conta de seguranca
     }
@@ -97,7 +101,10 @@ export class UsersService {
   }
 
   public async findByUuid(uuid: string): Promise<UsersEntity | null> {
-    const user = await this.userRepository.findOneBy({ uuid: uuid });
+    const user = await this.userRepository.findOne({
+      where: { uuid: uuid },
+      relations: ['enterprise'],
+    });
 
     if (!user) {
       return null;
@@ -139,7 +146,7 @@ export class UsersService {
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
       const mailPayload = payload.mail;
-      const user = await this.userRepository.findOneBy({ mail: mailPayload });
+      const user = await this.findByMail(mailPayload);
 
       if (user === null || user === undefined) {
         throw new BadRequestException('Error : User Not Found !');
