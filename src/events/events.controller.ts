@@ -50,7 +50,7 @@ export class EventsController {
   @Patch(':uuid')
   public async eventModify(
     @Headers('authorization') authHeader: string,
-    @Param() uuid: string,
+    @Param('uuid') uuid: string,
     @Body() request: EventsModifyDTO,
   ) {
     if (!authHeader) {
@@ -65,7 +65,7 @@ export class EventsController {
   @Delete(':uuid')
   public async eventDelete(
     @Headers('authorization') authHeader: string,
-    @Param() uuid: string,
+    @Param('uuid') uuid: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Token not found in request headers');
