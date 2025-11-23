@@ -180,4 +180,47 @@ export class EventsService {
       throw error;
     }
   }
+
+  public async eventsDelete(
+    uuid: string,
+    sessionToken: string,
+  ): Promise<boolean> {
+    if (!sessionToken) {
+      throw new NotFoundException('Error , session token not found !');
+    }
+
+    if (!uuid) {
+      throw new NotFoundException('Error , uuid not found !');
+    }
+
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(sessionToken);
+      const user = await this.usersService.findByMail(payload.mail);
+      const allowedRoles = [UsersRoles.MANAGER, UsersRoles.OWNER];
+      if (!user) {
+        throw new UnauthorizedException('Error , user not found!');
+      }
+      if (!allowedRoles.includes(user.role)) {
+        throw new BadRequestException(
+          'Error, you do not have permission (Manager/Owner only) to create an event!',
+        );
+      }
+
+      const event = await this.findByUuid(uuid);
+      if (!event) {
+        throw new NotFoundException('Error , event not found !');
+      }
+      await this.eventsRepository.remove(event);
+
+      return true;
+    } catch (error) {
+      if (
+        error instanceof JsonWebTokenError ||
+        error instanceof TokenExpiredError
+      ) {
+        throw new BadRequestException('Invalid or expired token');
+      }
+      throw error;
+    }
+  }
 }
