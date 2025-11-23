@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Headers,
+  Param,
   Patch,
   Post,
   UnauthorizedException,
@@ -46,11 +47,11 @@ export class EventsController {
   }
 
   @UseGuards(RolesGuard)
-  @Patch('event-modify')
+  @Patch(':uuid')
   public async eventModify(
     @Headers('authorization') authHeader: string,
-    @Body() uuid: string,
-    request: EventsModifyDTO,
+    @Param() uuid: string,
+    @Body() request: EventsModifyDTO,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Token not found in request headers');
@@ -61,10 +62,10 @@ export class EventsController {
     return this.eventsService.eventsModify(sessionToken, uuid, request);
   }
 
-  @Delete('event-delete')
+  @Delete(':uuid')
   public async eventDelete(
     @Headers('authorization') authHeader: string,
-    @Body() uuid: string,
+    @Param() uuid: string,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Token not found in request headers');
