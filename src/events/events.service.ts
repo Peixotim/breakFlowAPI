@@ -125,7 +125,7 @@ export class EventsService {
     request: EventsModifyDTO,
   ): Promise<EventsEntity> {
     if (!session_token) {
-      throw new NotFoundException('Error , session token not found !');
+      throw new UnauthorizedException('Error , session token not found !');
     }
 
     if (!uuid) {
@@ -142,7 +142,7 @@ export class EventsService {
       }
 
       if (!allowedRoles.includes(user.role)) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'Error, you do not have permission (Manager/Owner only) to create an event!',
         );
       }
@@ -181,22 +181,20 @@ export class EventsService {
     }
   }
 
-  public async eventsDelete(
-    uuid: string,
-    sessionToken: string,
-  ): Promise<boolean> {
+  public async eventsDelete(uuid: string, sessionToken: string): Promise<void> {
     if (!sessionToken) {
-      throw new NotFoundException('Error , session token not found !');
+      throw new UnauthorizedException('Error , session token not found !');
     }
 
     if (!uuid) {
-      throw new NotFoundException('Error , uuid not found !');
+      throw new ForbiddenException('Error , uuid not found !');
     }
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
       const user = await this.usersService.findByMail(payload.mail);
       const allowedRoles = [UsersRoles.MANAGER, UsersRoles.OWNER];
+
       if (!user) {
         throw new UnauthorizedException('Error , user not found!');
       }
@@ -210,9 +208,14 @@ export class EventsService {
       if (!event) {
         throw new NotFoundException('Error , event not found !');
       }
-      await this.eventsRepository.remove(event);
 
-      return true;
+      if (event.enterprise !== user.enterprise) {
+        throw new ForbiddenException(
+          'Error, the company you work for is not the same one from which you want to delete an event.',
+        );
+      }
+
+      await this.eventsRepository.remove(event);
     } catch (error) {
       if (
         error instanceof JsonWebTokenError ||
