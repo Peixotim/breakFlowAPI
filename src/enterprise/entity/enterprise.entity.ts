@@ -1,4 +1,5 @@
 import { EventsEntity } from 'src/events/entity/events.entity';
+import { SquadEntity } from 'src/squads/entity/squads.entity';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import {
   Column,
@@ -36,6 +37,9 @@ export class EnterpriseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => SquadEntity, (squad) => squad.enterprise)
+  squads: SquadEntity[];
 
   @OneToMany(() => UsersEntity, (user) => user.enterprise)
   users: UsersEntity[];
