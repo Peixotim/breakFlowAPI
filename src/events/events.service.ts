@@ -30,7 +30,7 @@ export class EventsService {
     }
     try {
       const payload = this.jwtService.verify<JwtPayload>(session_token);
-      const user = await this.usersService.findByMail(payload.mail);
+      const user = await this.usersService.findByMail(payload.email);
 
       if (user == null) {
         throw new NotFoundException('Error , user not found !');
@@ -68,7 +68,7 @@ export class EventsService {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken); //Recebe o sessionToken
-      const user = await this.usersService.findByMail(payload.mail); //Retorna o usuario de acordo com o email vindo do sessionToken
+      const user = await this.usersService.findByMail(payload.email); //Retorna o usuario de acordo com o email vindo do sessionToken
       const allowedRoles = [UsersRoles.OWNER, UsersRoles.MANAGER];
 
       if (user === null) {
@@ -134,7 +134,7 @@ export class EventsService {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(session_token);
-      const user = await this.usersService.findByMail(payload.mail);
+      const user = await this.usersService.findByMail(payload.email);
       const allowedRoles = [UsersRoles.OWNER, UsersRoles.MANAGER];
 
       if (!user) {
@@ -192,7 +192,7 @@ export class EventsService {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
-      const user = await this.usersService.findByMail(payload.mail);
+      const user = await this.usersService.findByMail(payload.email);
       const allowedRoles = [UsersRoles.MANAGER, UsersRoles.OWNER];
 
       if (!user) {

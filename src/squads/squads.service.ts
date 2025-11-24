@@ -42,7 +42,7 @@ export class SquadService {
     }
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
-      const user = await this.userService.findByMail(payload.mail);
+      const user = await this.userService.findByMail(payload.email);
       const allowedRole = UsersRoles.OWNER;
 
       if (!user) {
@@ -107,7 +107,7 @@ export class SquadService {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(sessionToken);
-      const userADM = await this.userService.findByMail(payload.mail);
+      const userADM = await this.userService.findByMail(payload.email);
       const userAdd = await this.userService.findByMail(user.mail);
       const currentSquad = await this.findByUuid(uuid);
       const allowedRoles = [UsersRoles.OWNER, UsersRoles.MANAGER];
