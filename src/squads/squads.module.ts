@@ -5,10 +5,11 @@ import { SquadEntity } from './entity/squads.entity';
 import { SquadService } from './squads.service';
 import { UsersModule } from 'src/users/users.module';
 import { EnterpriseModule } from 'src/enterprise/enterprise.module';
+import { UsersEntity } from 'src/users/entity/users.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SquadEntity]),
+    TypeOrmModule.forFeature([SquadEntity, UsersEntity]),
     UsersModule,
     EnterpriseModule,
   ],
