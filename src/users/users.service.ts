@@ -92,7 +92,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { mail: email },
-      relations: ['enterprise'],
+      relations: ['enterprise'], //Traz as relações enterprise
     });
     if (!user) {
       return null; //Nao posso personalizar o erro por conta de seguranca
