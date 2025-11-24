@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Headers,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -35,6 +37,7 @@ export class EventsController {
   }
 
   @Post('get-events')
+  @HttpCode(HttpStatus.OK) // OK
   public async getEvents(
     @Headers('authorization') authHeader: string,
   ): Promise<EventsEntity[]> {
@@ -63,6 +66,7 @@ export class EventsController {
   }
 
   @Delete(':uuid')
+  @HttpCode(HttpStatus.NO_CONTENT) // NO CONTENT
   public async eventDelete(
     @Headers('authorization') authHeader: string,
     @Param('uuid') uuid: string,
