@@ -9,6 +9,7 @@ import { EnterpriseModule } from 'src/enterprise/enterprise.module';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import { PasswordResetEntity } from 'src/password-reset/entity/password-reset.entity';
 import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
+import { SquadModule } from 'src/squads/squads.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { EnterpriseEntity } from 'src/enterprise/entity/enterprise.entity';
     AuthModule,
     UsersModule,
     EnterpriseModule,
+    SquadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
