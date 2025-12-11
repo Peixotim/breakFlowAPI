@@ -12,10 +12,12 @@ import { OwnerGuard } from 'src/auth/guards/owner.guards';
 import { SquadRegister } from './DTOs/squads-register.dto';
 import { SquadService } from './squads.service';
 import { SquadsAdding } from './DTOs/squads-adding.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guards';
 
 @Controller('squad')
 export class SquadController {
   constructor(private readonly squadService: SquadService) {}
+
   @UseGuards(OwnerGuard)
   @Post('register-squad')
   public async registerSquad(
@@ -36,6 +38,7 @@ export class SquadController {
     return this.squadService.findByUuid(uuid);
   }
 
+  @UseGuards(RolesGuard)
   @Post('adding-to-squad/:uuid')
   public async addingToSquad(
     @Param('uuid') uuid: string,
@@ -50,4 +53,7 @@ export class SquadController {
 
     return await this.squadService.addingToSquad(request, sessionToken, uuid);
   }
+
+  @Get('all-squads')
+  public async getAllSquads() {}
 }
