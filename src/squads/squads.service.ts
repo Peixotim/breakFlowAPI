@@ -164,4 +164,31 @@ export class SquadService {
       throw new BadRequestException('Error processing your request.');
     }
   }
+
+  public async getAllSquads(): Promise<SquadEntity[]> {
+    try {
+      const squad: SquadEntity[] = await this.squadRepository.find();
+
+      if (!squad) {
+        throw new NotFoundException(`Error : there is no squad registered! `);
+      }
+
+      return squad;
+    } catch (error) {
+      if (
+        error instanceof JsonWebTokenError ||
+        error instanceof TokenExpiredError
+      ) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      console.error('Generic Error:', error);
+
+      throw new BadRequestException('Error processing your request.');
+    }
+  }
 }
